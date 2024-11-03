@@ -4,10 +4,12 @@
 #include <memory>
 
 #include "common.hpp"
+#include "mapper.hpp"
 
 class Cartridge {
     public:
         Cartridge(std::string game_path);
+        uint8_t get_mapper_id() const;
     private:
         std::unique_ptr<uint8_t[]> m_prg_rom;
         std::unique_ptr<uint8_t[]> m_chr_rom;

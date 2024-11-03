@@ -60,3 +60,8 @@ void Cartridge::load_game(){
 
 
 }
+
+
+uint8_t Cartridge::get_mapper_id() const {
+    return m_mapper_id;
+}
