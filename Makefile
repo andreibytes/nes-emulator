@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS= -Wall -Wextra -std=c++14 -I./includes
+CFLAGS= -Wall -Wextra -std=c++20 -I./includes
 EXECUTABLE=emulator
 INCLUDES=./includes
 SRC=./src
