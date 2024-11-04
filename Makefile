@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS= -Wall -Wextra -std=c++11 -I./includes
+CFLAGS= -Wall -Wextra -std=c++14 -I./includes
 EXECUTABLE=emulator
 INCLUDES=./includes
 SRC=./src
@@ -12,7 +12,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 
 %.o: emulator.cpp $(SRC)/%.cpp
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) $^
 
 
 clean:

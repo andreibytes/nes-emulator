@@ -52,6 +52,8 @@ void Cartridge::load_game(){
                     m_chr_rom[i] = game_file.get();
                 }
 
+                std::cout << "[+] Loaded " << m_game_path << std::endl;
+
             } else {
                 std::cout << "[-] Not a valid INES file, please try again" << std::endl;
             }
