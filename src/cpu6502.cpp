@@ -79,7 +79,3 @@ void CPU6502::set_addressing_mode(uint8_t opcode){
         m_current_addressing_mode = RELATIVE;
     } 
 }
-
-void CPU6502::setup_call_table(){
-
-}
