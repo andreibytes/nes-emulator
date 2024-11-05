@@ -79,3 +79,67 @@ void CPU6502::set_addressing_mode(uint8_t opcode){
         m_current_addressing_mode = RELATIVE;
     } 
 }
+
+void CPU6502::setup_call_table(){
+    m_call_table[0x69] = ADC; m_call_table[0x6D] = ADC; m_call_table[0x7D] = ADC; m_call_table[0x79] = ADC;
+    m_call_table[0x65] = ADC; m_call_table[0x75] = ADC; m_call_table[0x61] = ADC; m_call_table[0x71] = ADC;
+
+    m_call_table[0x29] = AND; m_call_table[0x2D] = AND; m_call_table[0x3D] = AND;  m_call_table[0x39] = AND; 
+    m_call_table[0x25] = AND; m_call_table[0x35] = AND; m_call_table[0x21] = AND;  m_call_table[0x31] = AND; 
+
+    m_call_table[0x0A] = ASL; m_call_table[0x0E] = ASL; m_call_table[0x1E] = ASL;  m_call_table[0x06] = ASL; 
+    m_call_table[0x16] = ASL;
+
+    m_call_table[0x90] = BCC;
+    m_call_table[0xB0] = BCS;
+    m_call_table[0xF0] = BEQ;
+
+    m_call_table[0x2C] = BIT; m_call_table[0x24] = BIT;
+
+    m_call_table[0x30] = BMI;
+    m_call_table[0xD0] = BNE;
+    m_call_table[0x10] = BPL;
+    m_call_table[0x00] = BRK;
+    m_call_table[0x50] = BVC;
+    m_call_table[0x70] = BVS;
+    m_call_table[0x18] = CLC;
+    m_call_table[0xD8] = CLD;
+    m_call_table[0x58] = CLI;
+    m_call_table[0xB8] = CLV;
+
+    m_call_table[0xC9] = CMP; m_call_table[0xCD] = CMP; m_call_table[0xDD] = CMP; m_call_table[0xD9] = CMP;
+    m_call_table[0xC5] = CMP; m_call_table[0xD5] = CMP; m_call_table[0xC1] = CMP; m_call_table[0xD1] = CMP;
+
+    m_call_table[0xE0] = CPX; m_call_table[0xEC] = CPX; m_call_table[0xE4] = CPX;
+
+    m_call_table[0xC0] = CPY; m_call_table[0xCC] = CPY; m_call_table[0xC4] = CPY;
+
+    m_call_table[0xCE] = DEC; m_call_table[0xDE] = DEC; m_call_table[0xC6] = DEC; m_call_table[0xD6] = DEC;
+
+    m_call_table[0xCA] = DEX;
+    m_call_table[0x88] = DEY;
+
+    m_call_table[0x49] = EOR; m_call_table[0x4D] = EOR; m_call_table[0x5D] = EOR; m_call_table[0x59] = EOR;
+    m_call_table[0x45] = EOR; m_call_table[0x55] = EOR; m_call_table[0x41] = EOR; m_call_table[0x51] = EOR;
+
+    m_call_table[0xEE] = INC; m_call_table[0xFE] = INC; m_call_table[0xE6] = INC; m_call_table[0xF6] = INC;
+
+    m_call_table[0xE8] = INX;
+    m_call_table[0xC8] = INY;
+
+    m_call_table[0x4C] = JMP; m_call_table[0x6C] = JMP;
+
+    m_call_table[0x20] = JSR;
+
+
+
+    
+
+
+    
+
+
+
+
+
+}

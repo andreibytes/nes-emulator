@@ -15,6 +15,7 @@ typedef enum {
 
 class CPU6502 {
     public:
+        using FuncPtr = void(CPU6502::*)();
         CPU6502(BUS* bus);
         uint64_t get_cycle_count() const;
     private:
@@ -28,10 +29,25 @@ class CPU6502 {
             uint8_t  S;
         } m_registers;
         uint64_t m_cycles = 0;
-        std::unordered_map<uint8_t, std::function<void()>> m_call_table;
+        std::unordered_map<uint8_t, FuncPtr> m_call_table;
         e_addressing_mode m_current_addressing_mode = IMMEDIATE;
     private:
         void read_reset_vector();
         void setup_call_table();
         void set_addressing_mode(uint8_t opcode);
+    private:
+        void LDA(); void LDX(); void LDY(); void STA();
+        void STX(); void STY(); void TAX(); void TAY();
+        void TXA(); void TYA(); void TSX(); void TXS();
+        void ADC(); void SBC(); void AND(); void ORA();
+        void EOR(); void CMP(); void CPX(); void CPY();
+        void INC(); void INX(); void INY(); void DEC();
+        void DEX(); void DEY(); void LSR(); void ASL();
+        void ROL(); void ROR(); void BIT(); void BCC();
+        void BCS(); void BEQ(); void BMI(); void BNE();
+        void BPL(); void BVC(); void BVS(); void JMP();
+        void JSR(); void RTS(); void CLC(); void CLD();
+        void CLI(); void CLV(); void SEC(); void SED();
+        void SEI(); void PHA(); void PHP(); void PLA();
+        void PLP(); void NOP(); void BRK(); void RTI();
 };
