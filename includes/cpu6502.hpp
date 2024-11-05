@@ -16,7 +16,7 @@ typedef enum {
 class CPU6502 {
     public:
         CPU6502(BUS* bus);
-        uint64_t get_cycle_count();
+        uint64_t get_cycle_count() const;
     private:
         BUS* m_bus = nullptr;
         struct {
@@ -33,5 +33,5 @@ class CPU6502 {
     private:
         void read_reset_vector();
         void setup_call_table();
-        void get_addressing_mode(uint8_t opcode);
+        void set_addressing_mode(uint8_t opcode);
 };
