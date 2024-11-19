@@ -20,6 +20,18 @@ void Processor::read_reset_vector() {
     m_registers.PC = reset_vector_address;
 }
 
+void Processor::tick() {
+    for(int i = 0; i < 3; i++){
+        // TODO: Tick the PPU once I actually write it
+    }
+}
+
+uint8_t Processor::fetch() {
+    tick();
+    uint8_t data = m_bus.read(m_registers.PC);
+    m_registers.PC++;
+    return data;
+}
 
 void Processor::set_addressing_mode(uint8_t opcode) {
      static const std::unordered_set<uint8_t> IMPLIED_OPCODES = {
@@ -156,4 +168,63 @@ void Processor::setup_call_table(){
     m_call_table[0x86] = STX; m_call_table[0x96] = STX; m_call_table[0x8C] = STY;  m_call_table[0x84] = STY; 
     m_call_table[0x94] = STY; m_call_table[0xAA] = TAX; m_call_table[0xA8] = TAY;  m_call_table[0xBA] = TSX;
     m_call_table[0x8A] = TXA; m_call_table[0x9A] = TXS; m_call_table[0x98] = TYA;
+}
+
+
+/*
+    For every single instruction on the 6502 the first clock cycle will fetch the opcode so the ppu will get ticked the correct amount of times before the instruction
+    method is called.
+*/
+
+/*
+    For single byte instructions on the second clock cycle the next opcode is fetched
+    but discarded so that's why I call fetch and do nothing with the result.
+*/
+
+void Processor::ASL() {
+
+    uint8_t next_opc = fetch();
+
+    m_registers.AC <<= 1;
+}
+
+void Processor::DEX() {
+    uint8_t next_opc = fetch();
+
+    m_registers.IX--;
+
+    if(m_registers.IX == 0) {
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IX & BIT7_MASK) {
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+void Processor::NOP() {
+    uint8_t next_opc = fetch();
+}
+
+
+void Processor::TAX() {
+    uint8_t next_opc = fetch();
+
+    m_registers.IX = m_registers.AC;
+
+    if(m_registers.IX == 0){
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IX & BIT7_MASK) {
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+void Processor::TYA() {
+    uint8_t next_opc = fetch();
+
+    m_registers.AC = m_registers.IY;
+
+    if(m_registers.AC == 0){
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.AC & BIT7_MASK) {
+        m_registers.S |= NEGATIVE_MASK;
+    }
 }
