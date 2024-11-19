@@ -12,6 +12,8 @@ typedef enum {
     ZEROPAGEY
 } e_addressing_mode;
 
+
+
 // Class representing the modified 6502 processor on the NES
 
 class Processor {
@@ -27,11 +29,12 @@ class Processor {
             uint8_t  IY;
             uint8_t  S;
         } m_registers;
-        std::unordered_map<uint8_t, std::function<void(void)>> m_call_table;
+        std::unordered_map<uint8_t, void(Processor::*)()> m_call_table;
         e_addressing_mode m_addressing_mode;
     // Methods for initializing the cpu
     private:
         void read_reset_vector();
+        void setup_call_table();
         void set_addressing_mode(uint8_t opcode);
     
     // Methods for the cpu instructions
@@ -50,4 +53,4 @@ class Processor {
         void CLI(); void CLV(); void SEC(); void SED();
         void SEI(); void PHA(); void PHP(); void PLA();
         void PLP(); void NOP(); void BRK(); void RTI();
-}; 
+};
