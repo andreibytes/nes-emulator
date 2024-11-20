@@ -36,7 +36,6 @@ class Processor {
         void read_reset_vector();
         void setup_call_table();
         void set_addressing_mode(uint8_t opcode);
-        void tick();
         uint8_t fetch();
     
     // Methods for the cpu instructions

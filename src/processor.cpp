@@ -20,14 +20,8 @@ void Processor::read_reset_vector() {
     m_registers.PC = reset_vector_address;
 }
 
-void Processor::tick() {
-    for(int i = 0; i < 3; i++){
-        // TODO: Tick the PPU once I actually write it
-    }
-}
 
 uint8_t Processor::fetch() {
-    tick();
     uint8_t data = m_bus.read(m_registers.PC);
     m_registers.PC++;
     return data;
