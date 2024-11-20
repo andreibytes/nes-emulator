@@ -228,3 +228,57 @@ void Processor::TYA() {
         m_registers.S |= NEGATIVE_MASK;
     }
 }
+
+void Processor::CLC() {
+    uint8_t next_opc = fetch();
+
+    if(m_registers.S & CARRY_MASK){
+        m_registers.S ^= CARRY_MASK;
+    }
+}
+
+
+void Processor::DEY() {
+    uint8_t next_opc = fetch();
+
+    m_registers.IY--;
+
+    if(m_registers.IY == 0){
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IY & BIT7_MASK){
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+void Processor::TAY(){
+    uint8_t next_opc = fetch();
+
+    m_registers.IY = m_registers.AC;
+
+     if(m_registers.IY == 0){
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IY & BIT7_MASK){
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+
+void Processor::CLD() {
+    uint8_t next_opc = fetch();
+
+    if(m_registers.S & DECIMAL_MASK){
+        m_registers.S ^= DECIMAL_MASK;
+    }
+}
+
+void Processor::INX() {
+    uint8_t next_opc = fetch();
+
+    m_registers.IX++;
+
+    if(m_registers.IX == 0){
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IX & BIT7_MASK){
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
