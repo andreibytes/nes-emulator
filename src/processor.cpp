@@ -276,3 +276,69 @@ void Processor::INX() {
         m_registers.S |= NEGATIVE_MASK;
     }
 }
+
+void Processor::SEC() {
+    uint8_t next_opc = fetch();
+
+    m_registers.S |= CARRY_MASK;
+}
+
+void Processor::TSX() {
+    uint8_t next_opc = fetch();
+    
+    m_registers.IX = m_registers.SP;
+
+    if(m_registers.IX == 0) {
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IX & BIT7_MASK) {
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+void Processor::CLI() {
+    uint8_t next_opc = fetch();
+
+    if(m_registers.S & INTERRUPT_DISABLE_MASK) {
+        m_registers.S ^= INTERRUPT_DISABLE_MASK;
+    }
+}
+
+void Processor::INY() {
+    uint8_t next_opc = fetch();
+
+    m_registers.IY++;
+
+    if(m_registers.IY == 0){
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.IY & BIT7_MASK){
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+
+void Processor::SED() {
+    uint8_t next_opc = fetch();
+
+    m_registers.S |= DECIMAL_MASK;
+}
+
+void Processor::TXA() {
+    uint8_t next_opc = fetch();
+
+    m_registers.AC = m_registers.IX;
+
+     if(m_registers.AC == 0) {
+        m_registers.S |= ZERO_MASK;
+    } else if (m_registers.AC & BIT7_MASK) {
+        m_registers.S |= NEGATIVE_MASK;
+    }
+}
+
+
+void Processor::CLV() {
+    uint8_t next_opc = fetch();
+
+    if(m_registers.S & OVERFLOW_MASK){
+        m_registers.S ^= OVERFLOW_MASK;
+    }
+}
