@@ -342,3 +342,15 @@ void Processor::CLV() {
         m_registers.S ^= OVERFLOW_MASK;
     }
 }
+
+void Processor::SEI() {
+    uint8_t next_opc = fetch();
+
+    m_registers.S |= INTERRUPT_DISABLE_MASK;
+}
+
+void Processor::TXS() {
+    uint8_t next_opc = fetch();
+
+    m_registers.SP = m_registers.IX;
+}
