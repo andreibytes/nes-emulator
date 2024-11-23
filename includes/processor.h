@@ -37,6 +37,7 @@ class Processor {
         void setup_call_table();
         void set_addressing_mode(uint8_t opcode);
         uint8_t fetch();
+        void fetch_no_ret();
     
     // Methods for the cpu instructions
     private:

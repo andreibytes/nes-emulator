@@ -27,6 +27,11 @@ uint8_t Processor::fetch() {
     return data;
 }
 
+void Processor::fetch_no_ret() {
+    uint8_t data = m_bus.read(m_registers.PC);
+    m_registers.PC++;
+}
+
 void Processor::set_addressing_mode(uint8_t opcode) {
      static const std::unordered_set<uint8_t> IMPLIED_OPCODES = {
         0x00, 0x18, 0xD8, 0x58, 0xB8, 0xCA, 0x88, 0xE8,
@@ -176,14 +181,12 @@ void Processor::setup_call_table(){
 */
 
 void Processor::ASL() {
-
-    uint8_t next_opc = fetch();
-
+    
     m_registers.AC <<= 1;
+    fetch_no_ret();
 }
 
 void Processor::DEX() {
-    uint8_t next_opc = fetch();
 
     m_registers.IX--;
 
@@ -192,15 +195,16 @@ void Processor::DEX() {
     } else if (m_registers.IX & BIT7_MASK) {
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::NOP() {
-    uint8_t next_opc = fetch();
+    fetch_no_ret();
 }
 
 
 void Processor::TAX() {
-    uint8_t next_opc = fetch();
 
     m_registers.IX = m_registers.AC;
 
@@ -209,10 +213,11 @@ void Processor::TAX() {
     } else if (m_registers.IX & BIT7_MASK) {
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::TYA() {
-    uint8_t next_opc = fetch();
 
     m_registers.AC = m_registers.IY;
 
@@ -221,19 +226,21 @@ void Processor::TYA() {
     } else if (m_registers.AC & BIT7_MASK) {
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::CLC() {
-    uint8_t next_opc = fetch();
 
     if(m_registers.S & CARRY_MASK){
         m_registers.S ^= CARRY_MASK;
     }
+
+    fetch_no_ret();
 }
 
 
 void Processor::DEY() {
-    uint8_t next_opc = fetch();
 
     m_registers.IY--;
 
@@ -242,10 +249,11 @@ void Processor::DEY() {
     } else if (m_registers.IY & BIT7_MASK){
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::TAY(){
-    uint8_t next_opc = fetch();
 
     m_registers.IY = m_registers.AC;
 
@@ -254,19 +262,21 @@ void Processor::TAY(){
     } else if (m_registers.IY & BIT7_MASK){
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 
 void Processor::CLD() {
-    uint8_t next_opc = fetch();
 
     if(m_registers.S & DECIMAL_MASK){
         m_registers.S ^= DECIMAL_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::INX() {
-    uint8_t next_opc = fetch();
 
     m_registers.IX++;
 
@@ -275,16 +285,18 @@ void Processor::INX() {
     } else if (m_registers.IX & BIT7_MASK){
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::SEC() {
-    uint8_t next_opc = fetch();
 
     m_registers.S |= CARRY_MASK;
+
+    fetch_no_ret();
 }
 
 void Processor::TSX() {
-    uint8_t next_opc = fetch();
     
     m_registers.IX = m_registers.SP;
 
@@ -293,18 +305,20 @@ void Processor::TSX() {
     } else if (m_registers.IX & BIT7_MASK) {
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::CLI() {
-    uint8_t next_opc = fetch();
 
     if(m_registers.S & INTERRUPT_DISABLE_MASK) {
         m_registers.S ^= INTERRUPT_DISABLE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::INY() {
-    uint8_t next_opc = fetch();
 
     m_registers.IY++;
 
@@ -313,17 +327,19 @@ void Processor::INY() {
     } else if (m_registers.IY & BIT7_MASK){
         m_registers.S |= NEGATIVE_MASK;
     }
+
+    fetch_no_ret();
 }
 
 
 void Processor::SED() {
-    uint8_t next_opc = fetch();
 
     m_registers.S |= DECIMAL_MASK;
+
+    fetch_no_ret();
 }
 
 void Processor::TXA() {
-    uint8_t next_opc = fetch();
 
     m_registers.AC = m_registers.IX;
 
@@ -332,25 +348,30 @@ void Processor::TXA() {
     } else if (m_registers.AC & BIT7_MASK) {
         m_registers.S |= NEGATIVE_MASK;
     }
+    
+    fetch_no_ret();
 }
 
 
 void Processor::CLV() {
-    uint8_t next_opc = fetch();
 
     if(m_registers.S & OVERFLOW_MASK){
         m_registers.S ^= OVERFLOW_MASK;
     }
+
+    fetch_no_ret();
 }
 
 void Processor::SEI() {
-    uint8_t next_opc = fetch();
 
     m_registers.S |= INTERRUPT_DISABLE_MASK;
+
+    fetch_no_ret();
 }
 
 void Processor::TXS() {
-    uint8_t next_opc = fetch();
 
     m_registers.SP = m_registers.IX;
+
+    fetch_no_ret();
 }
