@@ -27,7 +27,11 @@ uint8_t Processor::fetch() {
     return data;
 }
 
-void Processor::fetch_no_ret() {
+void Processor::tick() {
+    // Tick PPU here through the BUS
+}
+
+void Processor::fetch_opcode() {
     uint8_t data = m_bus.read(m_registers.PC);
     m_registers.PC++;
 }
@@ -183,7 +187,7 @@ void Processor::setup_call_table(){
 void Processor::ASL() {
     
     m_registers.AC <<= 1;
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::DEX() {
@@ -196,11 +200,11 @@ void Processor::DEX() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::NOP() {
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 
@@ -214,7 +218,7 @@ void Processor::TAX() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::TYA() {
@@ -227,7 +231,7 @@ void Processor::TYA() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::CLC() {
@@ -236,7 +240,7 @@ void Processor::CLC() {
         m_registers.S ^= CARRY_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 
@@ -250,7 +254,7 @@ void Processor::DEY() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::TAY(){
@@ -263,7 +267,7 @@ void Processor::TAY(){
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 
@@ -273,7 +277,7 @@ void Processor::CLD() {
         m_registers.S ^= DECIMAL_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::INX() {
@@ -286,14 +290,14 @@ void Processor::INX() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::SEC() {
 
     m_registers.S |= CARRY_MASK;
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::TSX() {
@@ -306,7 +310,7 @@ void Processor::TSX() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::CLI() {
@@ -315,7 +319,7 @@ void Processor::CLI() {
         m_registers.S ^= INTERRUPT_DISABLE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::INY() {
@@ -328,7 +332,7 @@ void Processor::INY() {
         m_registers.S |= NEGATIVE_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 
@@ -336,7 +340,7 @@ void Processor::SED() {
 
     m_registers.S |= DECIMAL_MASK;
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::TXA() {
@@ -349,7 +353,7 @@ void Processor::TXA() {
         m_registers.S |= NEGATIVE_MASK;
     }
     
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 
@@ -359,19 +363,185 @@ void Processor::CLV() {
         m_registers.S ^= OVERFLOW_MASK;
     }
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::SEI() {
 
     m_registers.S |= INTERRUPT_DISABLE_MASK;
 
-    fetch_no_ret();
+    fetch_opcode();
 }
 
 void Processor::TXS() {
 
     m_registers.SP = m_registers.IX;
 
-    fetch_no_ret();
+    fetch_opcode();
+}
+
+
+void Processor::BCC() {
+    uint8_t branch_offset = fetch();
+
+    if(!(m_registers.S & CARRY_MASK)) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+
+void Processor::BCS() {
+    uint8_t branch_offset = fetch();
+
+    if(m_registers.S & CARRY_MASK) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+
+void Processor::BEQ() {
+    uint8_t branch_offset = fetch();
+
+    if(m_registers.S & ZERO_MASK) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+
+void Processor::BMI() {
+    uint8_t branch_offset = fetch();
+
+    if(m_registers.S & NEGATIVE_MASK) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+
+void Processor::BNE() {
+    uint8_t branch_offset = fetch();
+
+    if(!(m_registers.S & ZERO_MASK)) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+void Processor::BPL() {
+    uint8_t branch_offset = fetch();
+
+    if(!(m_registers.S & NEGATIVE_MASK)) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+
+void Processor::BVC() {
+    uint8_t branch_offset = fetch();
+
+    if(!(m_registers.S & OVERFLOW_MASK)) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
+}
+
+void Processor::BVS() {
+    uint8_t branch_offset = fetch();
+
+    if(m_registers.S & OVERFLOW_MASK) {
+        uint16_t updated_pc = m_registers.PC + branch_offset;
+
+
+        // Check if page boundary crossed
+        if((m_registers.PC % 256) + branch_offset > 256) {
+            tick();
+        }
+
+            
+        m_registers.PC = updated_pc;
+        tick();
+    } else {
+        fetch_opcode();
+    }
 }
