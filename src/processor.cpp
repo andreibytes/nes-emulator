@@ -27,10 +27,6 @@ uint8_t Processor::fetch() {
     return data;
 }
 
-void Processor::tick() {
-    // Tick PPU here through the BUS
-}
-
 void Processor::fetch_opcode() {
     uint8_t data = m_bus.read(m_registers.PC);
     m_registers.PC++;
@@ -385,17 +381,17 @@ void Processor::BCC() {
     uint8_t branch_offset = fetch();
 
     if(!(m_registers.S & CARRY_MASK)) {
+        uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -406,17 +402,17 @@ void Processor::BCS() {
     uint8_t branch_offset = fetch();
 
     if(m_registers.S & CARRY_MASK) {
+         uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -427,17 +423,17 @@ void Processor::BEQ() {
     uint8_t branch_offset = fetch();
 
     if(m_registers.S & ZERO_MASK) {
+        uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -448,17 +444,17 @@ void Processor::BMI() {
     uint8_t branch_offset = fetch();
 
     if(m_registers.S & NEGATIVE_MASK) {
+        uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -469,17 +465,17 @@ void Processor::BNE() {
     uint8_t branch_offset = fetch();
 
     if(!(m_registers.S & ZERO_MASK)) {
+        uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -489,17 +485,17 @@ void Processor::BPL() {
     uint8_t branch_offset = fetch();
 
     if(!(m_registers.S & NEGATIVE_MASK)) {
+         uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -510,17 +506,17 @@ void Processor::BVC() {
     uint8_t branch_offset = fetch();
 
     if(!(m_registers.S & OVERFLOW_MASK)) {
+        uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
@@ -530,18 +526,39 @@ void Processor::BVS() {
     uint8_t branch_offset = fetch();
 
     if(m_registers.S & OVERFLOW_MASK) {
+        uint8_t dummy_read = m_bus.read(m_registers.PC);
         uint16_t updated_pc = m_registers.PC + branch_offset;
 
 
         // Check if page boundary crossed
         if((m_registers.PC % 256) + branch_offset > 256) {
-            tick();
+            uint8_t dummy_page_read = m_bus.read((m_registers.PC & 0xFF00) + (updated_pc & 0x00FF));
         }
 
             
         m_registers.PC = updated_pc;
-        tick();
     } else {
         fetch_opcode();
     }
 }
+
+void Processor::ADC() {
+    switch(m_addressing_mode){
+        case IMMEDIATE:
+            uint8_t data = fetch();
+            break;
+        case ZEROPAGE:
+            break;
+        case ABSOLUTE:
+            break;
+        case INDIRECTX:
+            break;
+        case ABSOLUTEX:
+            break;
+        case ABSOLUTEY:
+            break;
+    }
+
+    fetch_opcode();
+}
+

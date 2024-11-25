@@ -38,7 +38,6 @@ class Processor {
         void set_addressing_mode(uint8_t opcode);
         uint8_t fetch();
         void fetch_opcode();
-        void tick();
     
     // Methods for the cpu instructions
     private:
