@@ -542,23 +542,162 @@ void Processor::BVS() {
     }
 }
 
-void Processor::ADC() {
-    switch(m_addressing_mode){
-        case IMMEDIATE:
-            uint8_t data = fetch();
-            break;
+
+/*
+    For STA check the INDIRECTY mode later on and verify correct behavior
+*/
+
+void Processor::STA() {
+    switch(m_addressing_mode) {
         case ZEROPAGE:
+            {
+                uint8_t zero_page_addr = fetch();
+                m_bus.write(zero_page_addr, m_registers.AC);
+            }
             break;
         case ABSOLUTE:
+            {
+                uint8_t abs_addr_low_byte = fetch();
+                uint8_t abs_addr_high_byte = fetch();
+                uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+                m_bus.write(abs_address, m_registers.AC);
+            }
             break;
         case INDIRECTX:
+            {
+                uint8_t zero_page_base_addr = fetch();
+                uint8_t indr_addr_low = zero_page_base_addr + m_registers.IX;
+                uint8_t indr_addr_high = indr_addr_low + 1;
+                uint16_t full_indr_addr = (indr_addr_high << 8) | indr_addr_low;
+                m_bus.write(full_indr_addr, m_registers.AC);
+            }
             break;
         case ABSOLUTEX:
+            {
+                uint8_t abs_addr_low_byte = fetch();
+                uint8_t abs_addr_high_byte = fetch();
+                uint8_t adl = abs_addr_low_byte + m_registers.IX;
+                uint8_t adh = abs_addr_high_byte;
+                uint16_t abs_address = (adh << 8) | adl;
+                uint8_t dummy_read_res = m_bus.read(abs_address);
+                if(adl + m_registers.IX > 255){
+                    adh++;
+                }
+                m_bus.write((adh << 8) | adl, m_registers.AC);
+
+            }
             break;
         case ABSOLUTEY:
+            {
+                uint8_t abs_addr_low_byte = fetch();
+                uint8_t abs_addr_high_byte = fetch();
+                uint8_t adl = abs_addr_low_byte + m_registers.IY;
+                uint8_t adh = abs_addr_high_byte;
+                uint16_t abs_address = (adh << 8) | adl;
+                uint8_t dummy_read_res = m_bus.read(abs_address);
+                if(adl + m_registers.IY > 255){
+                    adh++;
+                }
+                m_bus.write((adh << 8) | adl, m_registers.AC);
+
+            }
+            break;
+        case ZEROPAGEX:
+            {
+                uint8_t zero_page_base_address = fetch();
+                uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_base_address));
+                uint8_t zero_page_address_x = zero_page_base_address + m_registers.IX;
+                m_bus.write(zero_page_address_x, m_registers.AC);
+            }
+            break;
+        case ZEROPAGEY:
+            {
+                uint8_t zero_page_base_address = fetch();
+                uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_base_address));
+                uint8_t zero_page_address_x = zero_page_base_address + m_registers.IY;
+                m_bus.write(zero_page_address_x, m_registers.AC);
+            }
+            break;
+        case INDIRECTY:
+            {
+                uint8_t zero_page_base_addr = fetch();
+                uint8_t indr_addr_low = zero_page_base_addr + m_registers.IY;
+                uint8_t indr_addr_high = indr_addr_low + 1;
+                uint16_t full_indr_addr = (indr_addr_high << 8) | indr_addr_low;
+                m_bus.write(full_indr_addr, m_registers.AC);
+            }
+            break;
+        default:
+            // The switch statement should never reach the default case
             break;
     }
 
     fetch_opcode();
 }
 
+
+void Processor::STX() {
+    switch(m_addressing_mode) {
+        case ZEROPAGE:
+            {
+                uint8_t zero_page_addr = fetch();
+                m_bus.write(zero_page_addr, m_registers.IX);
+            }
+            break;
+        case ABSOLUTE:
+            {
+                uint8_t abs_addr_low_byte = fetch();
+                uint8_t abs_addr_high_byte = fetch();
+                uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+                m_bus.write(abs_address, m_registers.IX);
+            }
+            break;
+        
+        case ZEROPAGEY:
+            {
+                uint8_t zero_page_base_address = fetch();
+                uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_base_address));
+                uint8_t zero_page_address_x = zero_page_base_address + m_registers.IY;
+                m_bus.write(zero_page_address_x, m_registers.IX);
+            }
+            break;
+        default:
+            // The switch statement should never reach the default case
+            break;
+    }
+
+    fetch_opcode();
+}
+
+void Processor::STY() {
+    switch(m_addressing_mode) {
+        case ZEROPAGE:
+            {
+                uint8_t zero_page_addr = fetch();
+                m_bus.write(zero_page_addr, m_registers.IY);
+            }
+            break;
+        case ABSOLUTE:
+            {
+                uint8_t abs_addr_low_byte = fetch();
+                uint8_t abs_addr_high_byte = fetch();
+                uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+                m_bus.write(abs_address, m_registers.IY);
+            }
+            break;
+        
+        case ZEROPAGEX:
+              {
+                uint8_t zero_page_base_address = fetch();
+                uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_base_address));
+                uint8_t zero_page_address_x = zero_page_base_address + m_registers.IX;
+                m_bus.write(zero_page_address_x, m_registers.IY);
+            }
+            break;
+        default:
+            // The switch statement should never reach the default case
+            break;
+    }
+
+    fetch_opcode();
+}
