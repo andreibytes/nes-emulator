@@ -701,3 +701,203 @@ void Processor::STY() {
 
     fetch_opcode();
 }
+
+void Processor::DEC() {
+    switch(m_addressing_mode){
+        case ZEROPAGE:
+        {  
+            uint8_t zero_page_adl = fetch();
+            uint8_t data = m_bus.read(static_cast<uint16_t>(zero_page_adl));
+            uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_adl));
+
+            uint8_t modified_data = data--;
+
+            // Write data back to memory
+            m_bus.write(static_cast<uint16_t>(zero_page_adl), modified_data);
+            
+            if(modified_data == 0){
+                m_registers.S |= ZERO_MASK;
+            } else if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+             }
+
+        }
+            break;
+
+        case ABSOLUTE:
+        {
+            uint8_t abs_addr_low_byte = fetch();
+            uint8_t abs_addr_high_byte = fetch();
+            uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+
+            uint8_t data = m_bus.read(abs_address);
+
+            uint8_t dummy_read = m_bus.read(abs_address);
+
+            uint8_t modified_data = data--;
+
+            m_bus.write(abs_address, modified_data);
+
+            if(modified_data == 0){
+                m_registers.S |= ZERO_MASK;
+            } else if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+        }
+            break;
+        case ZEROPAGEX:
+        {
+            uint8_t zero_page_base_addr = fetch();
+            uint8_t dummy_read1 = m_bus.read(zero_page_base_addr);
+
+            uint8_t data = m_bus.read(zero_page_base_addr + m_registers.IX);
+
+            uint8_t dummy_read2 = m_bus.read(zero_page_base_addr + m_registers.IX);
+
+            uint8_t modified_data = data--;
+
+            m_bus.write(static_cast<uint16_t>(zero_page_base_addr + m_registers.IX) , modified_data);
+            
+            if(modified_data == 0){
+                m_registers.S |= ZERO_MASK;
+            } else if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+        }
+
+            break;
+        case ABSOLUTEX:
+        {
+            uint8_t abs_addr_low_byte = fetch();
+            uint8_t abs_addr_high_byte = fetch();
+            uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+
+            uint8_t dummy_read1 = m_bus.read(abs_address + m_registers.IX);
+
+            if(abs_addr_low_byte + m_registers.IX > 255){
+                    abs_addr_high_byte++;
+            }
+
+            uint8_t data = m_bus.read((abs_addr_high_byte << 8) | abs_addr_low_byte);
+
+            uint8_t modified_data = data--;
+            uint8_t dummy_read2 = m_bus.read(abs_address);
+
+            m_bus.write((abs_addr_high_byte << 8) | abs_addr_low_byte, modified_data);
+
+             if(modified_data == 0){
+                m_registers.S |= ZERO_MASK;
+            } else if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+        }
+            break;
+        default:
+            // The switch statement should never reach the default case
+    }
+}
+
+void Processor::ASL() {
+    switch(m_addressing_mode){
+        case ACCUMULATOR:
+        {
+            m_registers.S |= CARRY_MASK & (m_registers.AC & BIT7_MASK);
+
+            m_registers.AC <<= 1;
+            uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(0x0));
+
+            if(m_registers.AC == 0){
+                m_registers.S |= ZERO_MASK;
+            } else if (m_registers.AC & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+
+        }
+            break;
+        case ZEROPAGE:
+        {  
+            uint8_t zero_page_adl = fetch();
+            uint8_t data = m_bus.read(static_cast<uint16_t>(zero_page_adl));
+            uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_adl));
+
+            m_registers.S |= CARRY_MASK & (data & BIT7_MASK);
+            uint8_t modified_data = data << 1;
+
+            // Write data back to memory
+            m_bus.write(static_cast<uint16_t>(zero_page_adl), modified_data);
+            
+            if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+
+        }
+            break;
+
+        case ABSOLUTE:
+        {
+            uint8_t abs_addr_low_byte = fetch();
+            uint8_t abs_addr_high_byte = fetch();
+            uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+
+            uint8_t data = m_bus.read(abs_address);
+            m_registers.S |= CARRY_MASK & (data & BIT7_MASK);
+
+            uint8_t dummy_read = m_bus.read(abs_address);
+
+            uint8_t modified_data = data << 1;
+
+            m_bus.write(abs_address, modified_data);
+
+            if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+        }
+            break;
+        case ZEROPAGEX:
+        {
+            uint8_t zero_page_base_addr = fetch();
+            uint8_t dummy_read1 = m_bus.read(zero_page_base_addr);
+
+            uint8_t data = m_bus.read(zero_page_base_addr + m_registers.IX);
+
+            m_registers.S |= CARRY_MASK & (data & BIT7_MASK);
+            uint8_t dummy_read2 = m_bus.read(zero_page_base_addr + m_registers.IX);
+
+            uint8_t modified_data = data << 1;
+
+            m_bus.write(static_cast<uint16_t>(zero_page_base_addr + m_registers.IX) , modified_data);
+            
+            if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+        }
+
+            break;
+        case ABSOLUTEX:
+        {
+            uint8_t abs_addr_low_byte = fetch();
+            uint8_t abs_addr_high_byte = fetch();
+            uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
+
+            uint8_t dummy_read1 = m_bus.read(abs_address + m_registers.IX);
+
+            if(abs_addr_low_byte + m_registers.IX > 255){
+                    abs_addr_high_byte++;
+            }
+
+            uint8_t data = m_bus.read((abs_addr_high_byte << 8) | abs_addr_low_byte);
+            m_registers.S |= CARRY_MASK & (data & BIT7_MASK);
+            uint8_t modified_data = data << 1;
+            uint8_t dummy_read2 = m_bus.read(abs_address);
+
+            m_bus.write((abs_addr_high_byte << 8) | abs_addr_low_byte, modified_data);
+
+            if (modified_data & BIT7_MASK){
+                m_registers.S |= NEGATIVE_MASK;
+            }
+        }
+            break;
+        default:
+            // The switch statement should never reach the default case
+    }
+}
