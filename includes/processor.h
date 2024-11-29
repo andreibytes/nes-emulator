@@ -38,6 +38,8 @@ class Processor {
         void set_addressing_mode(uint8_t opcode);
         uint8_t fetch();
         void fetch_opcode();
+        void execute_read_modify_write(std::function<void(uint8_t&)> modify);
+        void execute_store(std::function<void(uint8_t)> write);
     
     // Methods for the cpu instructions
     private:
