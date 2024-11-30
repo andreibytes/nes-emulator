@@ -35,11 +35,12 @@ class Processor {
     private:
         void read_reset_vector();
         void setup_call_table();
+    private:
         void set_addressing_mode(uint8_t opcode);
         uint8_t fetch();
         void fetch_opcode();
         void execute_read_modify_write(std::function<void(uint8_t&)> modify);
-        void execute_store(std::function<void(uint8_t)> write);
+        void execute_store(std::function<void(uint16_t)> write);
     
     // Methods for the cpu instructions
     private:

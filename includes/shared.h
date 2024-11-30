@@ -11,3 +11,4 @@
 #define OVERFLOW_MASK 0x02
 #define NEGATIVE_MASK 0x01
 #define BIT7_MASK 0x40
+#define BIT0_MASK 0x01
