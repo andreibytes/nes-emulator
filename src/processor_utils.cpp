@@ -3,6 +3,11 @@
 #include <unordered_set>
 #include <iostream>
 
+
+void Processor::dummy_read(uint16_t address) {
+    uint8_t data = m_bus.read(address);
+}
+
 void Processor::set_addressing_mode(uint8_t opcode) {
      static const std::unordered_set<uint8_t> IMPLIED_OPCODES = {
         0x00, 0x18, 0xD8, 0x58, 0xB8, 0xCA, 0x88, 0xE8,
@@ -146,7 +151,7 @@ void Processor::execute_read_modify_write(std::function<void(uint8_t&)> modify){
         case ACCUMULATOR:
         { 
             modify(m_registers.AC);
-            uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(0x0));
+            dummy_read(static_cast<uint16_t>(0x0));
 
         }
             break;
@@ -154,7 +159,7 @@ void Processor::execute_read_modify_write(std::function<void(uint8_t&)> modify){
         {  
             uint8_t zero_page_adl = fetch();
             uint8_t data = m_bus.read(static_cast<uint16_t>(zero_page_adl));
-            uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_adl));
+            dummy_read(static_cast<uint16_t>(zero_page_adl));
 
             uint8_t data_to_modify = data;
 
@@ -175,7 +180,7 @@ void Processor::execute_read_modify_write(std::function<void(uint8_t&)> modify){
 
             uint8_t data = m_bus.read(abs_address);
 
-            uint8_t dummy_read = m_bus.read(abs_address);
+            dummy_read(abs_address);
 
             uint8_t data_to_modify = data;
 
@@ -189,11 +194,11 @@ void Processor::execute_read_modify_write(std::function<void(uint8_t&)> modify){
         case ZEROPAGEX:
         {
             uint8_t zero_page_base_addr = fetch();
-            uint8_t dummy_read1 = m_bus.read(zero_page_base_addr);
+            dummy_read(zero_page_base_addr);
 
             uint8_t data = m_bus.read(zero_page_base_addr + m_registers.IX);
 
-            uint8_t dummy_read2 = m_bus.read(zero_page_base_addr + m_registers.IX);
+            dummy_read(zero_page_base_addr + m_registers.IX);
 
             uint8_t data_to_modify = data;
 
@@ -211,7 +216,7 @@ void Processor::execute_read_modify_write(std::function<void(uint8_t&)> modify){
             uint8_t abs_addr_high_byte = fetch();
             uint16_t abs_address = (abs_addr_high_byte << 8) | abs_addr_low_byte;
 
-            uint8_t dummy_read1 = m_bus.read(abs_address + m_registers.IX);
+            dummy_read(abs_address + m_registers.IX);
 
             if(abs_addr_low_byte + m_registers.IX > 255){
                     abs_addr_high_byte++;
@@ -225,7 +230,7 @@ void Processor::execute_read_modify_write(std::function<void(uint8_t&)> modify){
 
             uint8_t modified_data = data_to_modify;
 
-            uint8_t dummy_read2 = m_bus.read(abs_address);
+            dummy_read(abs_address);
 
             m_bus.write((abs_addr_high_byte << 8) | abs_addr_low_byte, modified_data);
         }
@@ -267,7 +272,7 @@ void Processor::execute_store(std::function<void(uint16_t)> write) {
                 uint8_t adl = abs_addr_low_byte + m_registers.IX;
                 uint8_t adh = abs_addr_high_byte;
                 uint16_t abs_address = (adh << 8) | adl;
-                uint8_t dummy_read_res = m_bus.read(abs_address);
+                dummy_read(abs_address);
                 if(adl + m_registers.IX > 255){
                     adh++;
                 }
@@ -281,7 +286,7 @@ void Processor::execute_store(std::function<void(uint16_t)> write) {
                 uint8_t adl = abs_addr_low_byte + m_registers.IY;
                 uint8_t adh = abs_addr_high_byte;
                 uint16_t abs_address = (adh << 8) | adl;
-                uint8_t dummy_read_res = m_bus.read(abs_address);
+                dummy_read(abs_address);
                 if(adl + m_registers.IY > 255){
                     adh++;
                 }
@@ -291,7 +296,7 @@ void Processor::execute_store(std::function<void(uint16_t)> write) {
         case ZEROPAGEX:
             {
                 uint8_t zero_page_base_address = fetch();
-                uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_base_address));
+                dummy_read(static_cast<uint16_t>(zero_page_base_address));
                 uint8_t zero_page_address_x = zero_page_base_address + m_registers.IX;
                 write(zero_page_address_x);
             }
@@ -299,7 +304,7 @@ void Processor::execute_store(std::function<void(uint16_t)> write) {
         case ZEROPAGEY:
             {
                 uint8_t zero_page_base_address = fetch();
-                uint8_t dummy_read = m_bus.read(static_cast<uint16_t>(zero_page_base_address));
+                dummy_read(static_cast<uint16_t>(zero_page_base_address));
                 uint8_t zero_page_address_y = zero_page_base_address + m_registers.IY;
                 write(zero_page_address_y);
             }
@@ -317,4 +322,66 @@ void Processor::execute_store(std::function<void(uint16_t)> write) {
             // The switch statement should never reach the default case
             break;
     }
+}
+
+void Processor::execute_internal_operation(std::function<void(uint8_t)> internal_operation){
+        switch(m_addressing_mode){
+            case IMMEDIATE:
+            {
+                uint8_t data = fetch();
+                internal_operation(data);
+            }
+                break;
+            case ZEROPAGE:
+            {
+                uint8_t effective_address = fetch();
+                uint8_t data = m_bus.read(static_cast<uint16_t>(effective_address));
+                internal_operation(data);
+            }
+                break;
+            case ABSOLUTE:
+            {
+                uint8_t ADL = static_cast<uint16_t>(fetch());
+                uint8_t ADH = fetch();
+                uint8_t data = m_bus.read((ADH << 8) & ADL);
+                internal_operation(data);
+            }
+                break;
+            case INDIRECTX:
+            {
+                uint8_t BAL = fetch();
+                dummy_read(static_cast<uint16_t>(BAL));
+                uint8_t ADL = m_bus.read(BAL + m_registers.IX);
+                uint8_t ADH = m_bus.read(BAL + m_registers.IX + 1);
+                uint8_t data = m_bus.read((static_cast<uint16_t>(ADH) << 8) & ADL);
+                internal_operation(data);
+
+            }
+                break;
+            case ABSOLUTEX:
+            {
+                // uint8_t BAL = fetch();
+                // uint8_t BAH = fetch();
+
+            }
+                break;
+            case ABSOLUTEY:
+            {
+
+            }
+                break;
+             case ZEROPAGEX:
+            {
+
+            }
+                break;
+             case ZEROPAGEY:
+            {
+
+            }
+                break;
+            default:
+                break;
+
+        }
 }

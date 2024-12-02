@@ -41,6 +41,8 @@ class Processor {
         void fetch_opcode();
         void execute_read_modify_write(std::function<void(uint8_t&)> modify);
         void execute_store(std::function<void(uint16_t)> write);
+        void execute_internal_operation(std::function<void(uint8_t)> internal_operation);
+        void dummy_read(uint16_t address);
     
     // Methods for the cpu instructions
     private:
