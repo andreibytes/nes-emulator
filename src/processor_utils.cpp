@@ -343,7 +343,7 @@ void Processor::execute_internal_operation(std::function<void(uint8_t)> internal
             {
                 uint8_t ADL = static_cast<uint16_t>(fetch());
                 uint8_t ADH = fetch();
-                uint8_t data = m_bus.read((ADH << 8) & ADL);
+                uint8_t data = m_bus.read((ADH << 8) | ADL);
                 internal_operation(data);
             }
                 break;
@@ -353,31 +353,52 @@ void Processor::execute_internal_operation(std::function<void(uint8_t)> internal
                 dummy_read(static_cast<uint16_t>(BAL));
                 uint8_t ADL = m_bus.read(BAL + m_registers.IX);
                 uint8_t ADH = m_bus.read(BAL + m_registers.IX + 1);
-                uint8_t data = m_bus.read((static_cast<uint16_t>(ADH) << 8) & ADL);
+                uint8_t data = m_bus.read((static_cast<uint16_t>(ADH) << 8) | ADL);
                 internal_operation(data);
 
             }
                 break;
             case ABSOLUTEX:
             {
-                // uint8_t BAL = fetch();
-                // uint8_t BAH = fetch();
+                uint8_t BAL = fetch();
+                uint8_t BAH = fetch();
 
+                //TODO: Check this code later on
+                if(BAL + m_registers.IX > 255) {
+                    dummy_read(static_cast<uint16_t>(BAH) << 8 | BAL + m_registers.IX);
+                }
+
+                uint8_t data = m_bus.read((static_cast<uint16_t>(BAH) << 8 | BAL) + m_registers.IX); 
+                internal_operation(data);
             }
                 break;
             case ABSOLUTEY:
             {
+                uint8_t BAL = fetch();
+                uint8_t BAH = fetch();
 
+                if(BAL + m_registers.IX > 255) {
+                    dummy_read(static_cast<uint16_t>(BAH) << 8 | BAL + m_registers.IY);
+                }
+
+                uint8_t data = m_bus.read((static_cast<uint16_t>(BAH) << 8 | BAL) + m_registers.IY); 
+                internal_operation(data);
             }
                 break;
              case ZEROPAGEX:
             {
-
+                uint8_t BAL = fetch();
+                dummy_read(static_cast<uint16_t>(BAL));
+                uint8_t data = m_bus.read(static_cast<uint16_t>(BAL) + m_registers.IX);
+                internal_operation(data);
             }
                 break;
              case ZEROPAGEY:
             {
-
+                uint8_t BAL = fetch();
+                dummy_read(static_cast<uint16_t>(BAL));
+                uint8_t data = m_bus.read(static_cast<uint16_t>(BAL) + m_registers.IY);
+                internal_operation(data);
             }
                 break;
             default:

@@ -19,6 +19,8 @@ typedef enum {
 class Processor {
     public:
         Processor(Bus& bus);
+        // Can add an option to attach a debugger here
+        void execute_instruction();
     private:
         Bus& m_bus;
         struct {
@@ -29,6 +31,7 @@ class Processor {
             uint8_t  IY;
             uint8_t  S;
         } m_registers;
+        
         std::unordered_map<uint8_t, void(Processor::*)()> m_call_table;
         e_addressing_mode m_addressing_mode;
     // Methods for initializing the cpu
