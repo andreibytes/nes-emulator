@@ -17,6 +17,7 @@ typedef enum {
 // Class representing the modified 6502 processor on the NES
 
 class Processor {
+    friend class Debugger;
     public:
         Processor(Bus& bus);
         // Can add an option to attach a debugger here
@@ -41,7 +42,7 @@ class Processor {
     private:
         void set_addressing_mode(uint8_t opcode);
         uint8_t fetch();
-        void fetch_opcode();
+        uint8_t fetch_opcode();
         void execute_read_modify_write(std::function<void(uint8_t&)> modify);
         void execute_store(std::function<void(uint16_t)> write);
         void execute_internal_operation(std::function<void(uint8_t)> internal_operation);

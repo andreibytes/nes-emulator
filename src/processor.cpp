@@ -21,7 +21,7 @@ void Processor::read_reset_vector() {
 }
 
 void Processor::execute_instruction() {
-    uint8_t opcode = fetch();
+    uint8_t opcode = fetch_opcode();
     auto it = m_call_table.find(opcode);
     if(it != m_call_table.end()){
         (this->*(it->second))();
@@ -36,9 +36,10 @@ uint8_t Processor::fetch() {
     return data;
 }
 
-void Processor::fetch_opcode() {
+uint8_t Processor::fetch_opcode() {
     uint8_t data = m_bus.read(m_registers.PC);
     m_registers.PC++;
+    return data;
 }
 
 
@@ -59,11 +60,11 @@ void Processor::DEX() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::NOP() {
-    fetch_opcode();
+    
 }
 
 
@@ -77,7 +78,7 @@ void Processor::TAX() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::TYA() {
@@ -90,7 +91,7 @@ void Processor::TYA() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::CLC() {
@@ -99,7 +100,7 @@ void Processor::CLC() {
         m_registers.S ^= CARRY_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 
@@ -113,7 +114,7 @@ void Processor::DEY() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::TAY(){
@@ -126,7 +127,7 @@ void Processor::TAY(){
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 
@@ -136,7 +137,7 @@ void Processor::CLD() {
         m_registers.S ^= DECIMAL_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::INX() {
@@ -149,14 +150,14 @@ void Processor::INX() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::SEC() {
 
     m_registers.S |= CARRY_FLAG;
 
-    fetch_opcode();
+    
 }
 
 void Processor::TSX() {
@@ -169,7 +170,7 @@ void Processor::TSX() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::CLI() {
@@ -178,7 +179,7 @@ void Processor::CLI() {
         m_registers.S ^= INTERRUPT_DISABLE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::INY() {
@@ -191,7 +192,7 @@ void Processor::INY() {
         m_registers.S |= NEGATIVE_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 
@@ -199,7 +200,7 @@ void Processor::SED() {
 
     m_registers.S |= DECIMAL_FLAG;
 
-    fetch_opcode();
+    
 }
 
 void Processor::TXA() {
@@ -212,7 +213,7 @@ void Processor::TXA() {
         m_registers.S |= NEGATIVE_FLAG;
     }
     
-    fetch_opcode();
+    
 }
 
 
@@ -222,21 +223,21 @@ void Processor::CLV() {
         m_registers.S ^= OVERFLOW_FLAG;
     }
 
-    fetch_opcode();
+    
 }
 
 void Processor::SEI() {
 
     m_registers.S |= INTERRUPT_DISABLE_FLAG;
 
-    fetch_opcode();
+    
 }
 
 void Processor::TXS() {
 
     m_registers.SP = m_registers.IX;
 
-    fetch_opcode();
+    
 }
 
 
@@ -256,7 +257,7 @@ void Processor::BCC() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -277,7 +278,7 @@ void Processor::BCS() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -298,7 +299,7 @@ void Processor::BEQ() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -319,7 +320,7 @@ void Processor::BMI() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -340,7 +341,7 @@ void Processor::BNE() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -360,7 +361,7 @@ void Processor::BPL() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -381,7 +382,7 @@ void Processor::BVC() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -401,7 +402,7 @@ void Processor::BVS() {
             
         m_registers.PC = updated_pc;
     } else {
-        fetch_opcode();
+        
     }
 }
 
@@ -410,7 +411,7 @@ void Processor::STA() {
     execute_store([this](uint16_t addr) {
         m_bus.write(addr, m_registers.AC);
     });
-    fetch_opcode();
+    
 }
 
 
@@ -418,14 +419,14 @@ void Processor::STX() {
     execute_store([this](uint16_t addr) {
         m_bus.write(addr, m_registers.IX);
     });
-    fetch_opcode();
+    
 }
 
 void Processor::STY() {
     execute_store([this](uint16_t addr) {
         m_bus.write(addr, m_registers.IY);
     });
-    fetch_opcode();
+    
 }
 
 
@@ -443,6 +444,8 @@ void Processor::ASL() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::DEC() {
@@ -454,6 +457,8 @@ void Processor::DEC() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+    
+    
 }
 
 void Processor::INC() {
@@ -465,6 +470,8 @@ void Processor::INC() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 
@@ -482,6 +489,8 @@ void Processor::LSR() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::ROL() {
@@ -504,6 +513,8 @@ void Processor::ROL() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::ROR() {
@@ -526,6 +537,8 @@ void Processor::ROR() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::ADC() {
@@ -552,6 +565,8 @@ void Processor::ADC() {
                 m_registers.S |= NEGATIVE_FLAG;
             }
     });
+
+    
 }
 
 void Processor::AND() {
@@ -563,6 +578,8 @@ void Processor::AND() {
                 m_registers.S |= NEGATIVE_FLAG;
             }
     });
+
+    
 }
 
 void Processor::BIT() {
@@ -575,6 +592,8 @@ void Processor::BIT() {
             m_registers.S |= OVERFLOW_FLAG;
         }
     });
+
+    
 }
 
 void Processor::CMP() {
@@ -587,6 +606,8 @@ void Processor::CMP() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+    
+    
 }
 
 void Processor::CPX() {
@@ -599,6 +620,8 @@ void Processor::CPX() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::CPY() {
@@ -611,6 +634,8 @@ void Processor::CPY() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::EOR() {
@@ -622,6 +647,8 @@ void Processor::EOR() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::LDA() {
@@ -634,6 +661,8 @@ void Processor::LDA() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::LDX() {
@@ -646,6 +675,8 @@ void Processor::LDX() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::LDY() {
@@ -658,6 +689,8 @@ void Processor::LDY() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::ORA() {
@@ -669,6 +702,8 @@ void Processor::ORA() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
 }
 
 void Processor::SBC() {
@@ -695,4 +730,101 @@ void Processor::SBC() {
             m_registers.S |= NEGATIVE_FLAG;
         }
     });
+
+    
+}
+
+void Processor::PHP() {
+    
+    m_bus.write(m_registers.SP, m_registers.S);
+}
+
+void Processor::PHA() {
+    
+    m_bus.write(m_registers.SP, m_registers.AC);
+}
+
+void Processor::PLP() {
+    
+    dummy_read(m_registers.SP);
+    uint8_t data = m_bus.read(m_registers.SP + 1);
+    m_registers.S = data;
+}
+
+
+void Processor::PLA() {
+    
+    dummy_read(m_registers.SP);
+    uint8_t data = m_bus.read(m_registers.SP + 1);
+    m_registers.AC = data;
+}
+
+
+void Processor::JSR() {
+    uint8_t ADL = fetch();
+    dummy_read(m_registers.SP);
+    uint8_t PCH = static_cast<uint8_t>(m_registers.PC >> 8);
+    uint8_t PCL = static_cast<uint8_t>((m_registers.PC << 8) >> 8);
+    m_bus.write(m_registers.SP, PCH);
+    m_bus.write(m_registers.SP - 1, PCL);
+    uint8_t ADH = fetch();
+    m_registers.PC = (static_cast<uint16_t>(ADH) << 8) & static_cast<uint16_t>(ADL) - 1;
+    
+}
+
+void Processor::BRK() {
+    dummy_read(m_registers.PC + 1);
+    uint8_t PCH = static_cast<uint8_t>(m_registers.PC >> 8);
+    uint8_t PCL = static_cast<uint8_t>((m_registers.PC << 8) >> 8);
+    m_bus.write(m_registers.SP, PCH);
+    m_bus.write(m_registers.SP - 1, PCL);
+    m_bus.write(m_registers.SP - 2, m_registers.S);
+    uint8_t ADL = fetch();
+    uint8_t ADH = fetch();
+    m_registers.PC = (static_cast<uint16_t>(ADH) << 8) & static_cast<uint16_t>(ADL) - 1;
+    
+
+}
+
+void Processor::RTI() {
+    dummy_read(m_registers.PC + 1);
+    dummy_read(m_registers.SP);
+    uint8_t status_register = m_bus.read(m_registers.SP + 1);
+    uint8_t PCL = m_bus.read(m_registers.SP + 2);
+    uint8_t PCH = m_bus.read(m_registers.SP + 3);
+    m_registers.S = status_register;
+    m_registers.PC = (static_cast<uint16_t>(PCH) << 8) & static_cast<uint16_t>(PCL) - 1;
+    
+}
+
+void Processor::JMP() {
+    switch (m_addressing_mode)
+    {
+    case ABSOLUTE:
+        uint8_t ADL = fetch();
+        uint8_t ADH = fetch();
+        m_registers.PC = (static_cast<uint16_t>(ADH) << 8) & static_cast<uint16_t>(ADL) - 1;
+        
+        break;
+    case INDIRECT:
+        std::cout << "Indirect addressing for JMP not implemented yet" << std::endl;
+        // break;
+        // uint8_t IAL = fetch();
+        // uint8_t IAH = fetch();
+        // uint16_t indirect_address = (static_cast<uint16_t>(IAH) << 8) & static_cast<uint16_t>(IAL);
+
+    default:
+        break;
+    }
+}
+
+void Processor::RTS() {
+    dummy_read(m_registers.PC + 1);
+    dummy_read(m_registers.SP);
+    uint8_t PCL = m_bus.read(m_registers.SP + 1);
+    uint8_t PCH = m_bus.read(m_registers.SP + 2);
+    m_registers.PC = (static_cast<uint16_t>(PCH) << 8) & static_cast<uint16_t>(PCL);
+    dummy_read(m_registers.PC);
+    
+
 }
